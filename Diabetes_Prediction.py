@@ -291,9 +291,9 @@ def generate_medical_pdf(patient, prediction_text, range_bars_png, radar_png):
     pdf.cell(0, 8, "Doctor's Recommendation", ln=True)
     pdf.set_font(base_font, "", 12)
     recommendation = (
-        "⚠️ The model predicts a risk of Diabetes. Please consult a physician."
+        "WARNING: The model predicts a risk of Diabetes. Please consult a physician."
         if "Diabetic" in prediction_text
-        else "✅ No diabetes indicated. Maintain a healthy lifestyle."
+        else "SUCCESS: No diabetes indicated. Maintain a healthy lifestyle."
     )
     pdf.multi_cell(0, 7, recommendation)
 
@@ -501,6 +501,7 @@ if __name__ == "__main__":
     main()
 
 # Run:     py -m streamlit run c:/Users/sripathivr/Tasks/Diabetes_Prediction/Diabetes_Prediction.py
+
 
 
 
