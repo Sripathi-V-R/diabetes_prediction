@@ -189,12 +189,31 @@ def generate_medical_pdf(patient, prediction_text, range_bars_png, radar_png):
     pdf = FPDF()
     pdf.add_page()
 
-    # Register all DejaVu styles (regular, bold, italic, bold-italic)
+    # ✅ Register available DejaVu fonts
     font_dir = "/usr/share/fonts/truetype/dejavu/"
     pdf.add_font("DejaVu", "", os.path.join(font_dir, "DejaVuSans.ttf"), uni=True)
-    pdf.add_font("DejaVu", "B", os.path.join(font_dir, "DejaVuSans-Bold.ttf"), uni=True)
-    pdf.add_font("DejaVu", "I", os.path.join(font_dir, "DejaVuSans-Oblique.ttf"), uni=True)
-    pdf.add_font("DejaVu", "BI", os.path.join(font_dir, "DejaVuSans-BoldOblique.ttf"), uni=True)
+
+    # Bold is almost always present
+    bold_path = os.path.join(font_dir, "DejaVuSans-Bold.ttf")
+    if os.path.exists(bold_path):
+        pdf.add_font("DejaVu", "B", bold_path, uni=True)
+
+    # Try italic
+    italic_path = os.path.join(font_dir, "DejaVuSans-Oblique.ttf")
+    if os.path.exists(italic_path):
+        pdf.add_font("DejaVu", "I", italic_path, uni=True)
+    else:
+        # Fallback → reuse regular for italic
+        pdf.add_font("DejaVu", "I", os.path.join(font_dir, "DejaVuSans.ttf"), uni=True)
+
+    # Try bold-italic
+    bi_path = os.path.join(font_dir, "DejaVuSans-BoldOblique.ttf")
+    if os.path.exists(bi_path):
+        pdf.add_font("DejaVu", "BI", bi_path, uni=True)
+    else:
+        # Fallback → reuse bold if available, else regular
+        fallback = bold_path if os.path.exists(bold_path) else os.path.join(font_dir, "DejaVuSans.ttf")
+        pdf.add_font("DejaVu", "BI", fallback, uni=True)
 
     # Default font
     pdf.set_font("DejaVu", "", 12)
@@ -297,9 +316,9 @@ def generate_medical_pdf(patient, prediction_text, range_bars_png, radar_png):
     pdf.cell(0, 8, "Doctor's Recommendation", ln=True)
     pdf.set_font("DejaVu", "", 12)
     recommendation = (
-        "The model predicts a risk of Diabetes. Please consult a physician."
+        "⚠️ The model predicts a risk of Diabetes. Please consult a physician."
         if "Diabetic" in prediction_text
-        else "No diabetes indicated. Maintain a healthy lifestyle."
+        else "✅ No diabetes indicated. Maintain a healthy lifestyle."
     )
     pdf.multi_cell(0, 7, recommendation)
 
@@ -507,6 +526,7 @@ if __name__ == "__main__":
     main()
 
 # Run:     py -m streamlit run c:/Users/sripathivr/Tasks/Diabetes_Prediction/Diabetes_Prediction.py
+
 
 
 
