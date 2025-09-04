@@ -189,9 +189,13 @@ def generate_medical_pdf(patient, prediction_text, range_bars_png, radar_png):
     pdf = FPDF()
     pdf.add_page()
 
-    # Use only built-in Helvetica font (safe for fpdf)
-    base_font = "Helvetica"
-    pdf.set_font(base_font, "", 12)
+    # ✅ Load Unicode-capable font (DejaVuSans)
+    # Works on Streamlit Cloud (Linux) at this path
+    font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+    if not os.path.exists(font_path):
+        raise FileNotFoundError(f"Font not found at {font_path}. Install 'fonts-dejavu-core'.")
+    pdf.add_font("DejaVu", "", font_path, uni=True)
+    pdf.set_font("DejaVu", "", 12)
 
     # ---- Header ----
     if os.path.exists(LOGO_PATH):
@@ -200,9 +204,9 @@ def generate_medical_pdf(patient, prediction_text, range_bars_png, radar_png):
         except Exception:
             pass
 
-    pdf.set_font(base_font, "B", 16)
+    pdf.set_font("DejaVu", "B", 16)
     pdf.cell(0, 10, "Diabetes Prediction Medical Report", ln=True, align="C")
-    pdf.set_font(base_font, "", 11)
+    pdf.set_font("DejaVu", "", 11)
     pdf.cell(0, 6, "Sunrise Diagnostics & Wellness Center", ln=True, align="C")
     pdf.cell(0, 6, "123 Health Street, Wellness City  +91-98765-43210", ln=True, align="C")
     pdf.cell(0, 6, "Email: care@sunriseclinic.example", ln=True, align="C")
@@ -213,9 +217,9 @@ def generate_medical_pdf(patient, prediction_text, range_bars_png, radar_png):
     pdf.ln(6)
 
     # ---- Patient Info ----
-    pdf.set_font(base_font, "B", 12)
+    pdf.set_font("DejaVu", "B", 12)
     pdf.cell(0, 8, "Patient Information", ln=True)
-    pdf.set_font(base_font, "", 12)
+    pdf.set_font("DejaVu", "", 12)
 
     name_prefix = "Mr." if patient["gender"] == "Male" else "Ms." if patient["gender"] == "Female" else "Mx."
     pdf.multi_cell(
@@ -232,9 +236,9 @@ def generate_medical_pdf(patient, prediction_text, range_bars_png, radar_png):
     pdf.ln(2)
 
     # ---- Measurements ----
-    pdf.set_font(base_font, "B", 12)
+    pdf.set_font("DejaVu", "B", 12)
     pdf.cell(0, 8, "Measurements", ln=True)
-    pdf.set_font(base_font, "", 12)
+    pdf.set_font("DejaVu", "", 12)
     col_w = [60, 60, 60]
     row_h = 8
 
@@ -244,23 +248,23 @@ def generate_medical_pdf(patient, prediction_text, range_bars_png, radar_png):
         pdf.cell(col_w[2], row_h, c, 1)
         pdf.ln(row_h)
 
-    pdf.set_font(base_font, "B", 12)
+    pdf.set_font("DejaVu", "B", 12)
     row("Parameter", "Value", "Healthy Range")
-    pdf.set_font(base_font, "", 12)
+    pdf.set_font("DejaVu", "", 12)
     row("BMI", f"{patient['bmi']}", "18.5 - 24.9")
     row("HbA1c (%)", f"{patient['hba1c']}", "4.0 - 5.6")
     row("Glucose (mg/dL)", f"{patient['glucose']}", "90 - 140")
     pdf.ln(4)
 
     # ---- Prediction ----
-    pdf.set_font(base_font, "B", 12)
+    pdf.set_font("DejaVu", "B", 12)
     pdf.cell(0, 8, "Prediction", ln=True)
-    pdf.set_font(base_font, "", 12)
+    pdf.set_font("DejaVu", "", 12)
 
     if "Diabetic" in prediction_text:
-        pdf.set_text_color(180, 0, 0)
+        pdf.set_text_color(200, 0, 0)
     else:
-        pdf.set_text_color(0, 120, 0)
+        pdf.set_text_color(0, 150, 0)
 
     pdf.multi_cell(0, 8, prediction_text)
     pdf.set_text_color(0, 0, 0)
@@ -275,7 +279,7 @@ def generate_medical_pdf(patient, prediction_text, range_bars_png, radar_png):
             radar_path = f2.name
 
         pdf.ln(2)
-        pdf.set_font(base_font, "B", 12)
+        pdf.set_font("DejaVu", "B", 12)
         pdf.cell(0, 8, "Visual Summary", ln=True)
         y_img = pdf.get_y() + 2
         pdf.image(range_path, x=12, y=y_img, w=90)
@@ -287,19 +291,19 @@ def generate_medical_pdf(patient, prediction_text, range_bars_png, radar_png):
 
     # ---- Recommendation ----
     pdf.ln(2)
-    pdf.set_font(base_font, "B", 12)
+    pdf.set_font("DejaVu", "B", 12)
     pdf.cell(0, 8, "Doctor's Recommendation", ln=True)
-    pdf.set_font(base_font, "", 12)
+    pdf.set_font("DejaVu", "", 12)
     recommendation = (
-        "WARNING: The model predicts a risk of Diabetes. Please consult a physician."
+        "⚠️ The model predicts a risk of Diabetes. Please consult a physician."
         if "Diabetic" in prediction_text
-        else "SUCCESS: No diabetes indicated. Maintain a healthy lifestyle."
+        else "✅ No diabetes indicated. Maintain a healthy lifestyle."
     )
     pdf.multi_cell(0, 7, recommendation)
 
     # ---- Footer ----
     pdf.set_y(-25)
-    pdf.set_font(base_font, "I", 9)
+    pdf.set_font("DejaVu", "I", 9)
     pdf.cell(
         0,
         8,
@@ -316,6 +320,7 @@ def generate_medical_pdf(patient, prediction_text, range_bars_png, radar_png):
     with open(temp_pdf.name, "rb") as f:
         pdf_bytes = f.read()
     return pdf_bytes
+
 # ---------------------- APP ----------------------
 def main():
     st.set_page_config(page_title="Diabetes Prediction", layout="wide", page_icon="🩺")
@@ -358,7 +363,7 @@ def main():
         try:
             return float(val)
         except ValueError:
-            st.warning(f"⚠️ Please enter a valid number for {label}")
+            st.warning(f" Please enter a valid number for {label}")
             return default
 
     with tab1:
@@ -452,7 +457,7 @@ def main():
                 st.error(f"Prediction failed: {e}")
                 st.stop()
 
-            pred_text = f"Prediction: {'🩸 Diabetic' if pred[0]==1 else '✅ Not Diabetic'}"
+            pred_text = f"Prediction: {'Diabetic' if pred[0]==1 else 'Not Diabetic'}"
             if prob is not None:
                 pred_text += f" (Risk Probability: {prob:.2%})"
 
@@ -501,6 +506,7 @@ if __name__ == "__main__":
     main()
 
 # Run:     py -m streamlit run c:/Users/sripathivr/Tasks/Diabetes_Prediction/Diabetes_Prediction.py
+
 
 
 
