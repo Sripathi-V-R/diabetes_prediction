@@ -369,6 +369,7 @@ def main():
 
 if __name__ == "__main__":
     main()
- ===
+
 
 # Run:     py -m streamlit run c:/Users/sripathivr/Tasks/Diabetes_Prediction/Diabetes_Prediction.py
+
