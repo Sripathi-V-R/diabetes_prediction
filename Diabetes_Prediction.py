@@ -189,20 +189,22 @@ def generate_medical_pdf(patient, prediction_text, range_bars_png, radar_png):
     pdf = FPDF()
     pdf.add_page()
 
-    # ✅ Load Unicode-capable font (DejaVuSans)
-    # Works on Streamlit Cloud (Linux) at this path
-    font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
-    if not os.path.exists(font_path):
-        raise FileNotFoundError(f"Font not found at {font_path}. Install 'fonts-dejavu-core'.")
-    pdf.add_font("DejaVu", "", font_path, uni=True)
+    # ✅ Register all DejaVu styles (regular, bold, italic, bold-italic)
+    font_dir = "/usr/share/fonts/truetype/dejavu/"
+    pdf.add_font("DejaVu", "", os.path.join(font_dir, "DejaVuSans.ttf"), uni=True)
+    pdf.add_font("DejaVu", "B", os.path.join(font_dir, "DejaVuSans-Bold.ttf"), uni=True)
+    pdf.add_font("DejaVu", "I", os.path.join(font_dir, "DejaVuSans-Oblique.ttf"), uni=True)
+    pdf.add_font("DejaVu", "BI", os.path.join(font_dir, "DejaVuSans-BoldOblique.ttf"), uni=True)
+
+    # Default font
     pdf.set_font("DejaVu", "", 12)
 
     # ---- Header ----
-    if os.path.exists(LOGO_PATH):
-        try:
+    try:
+        if os.path.exists(LOGO_PATH):
             pdf.image(str(LOGO_PATH), 10, 8, 25)
-        except Exception:
-            pass
+    except Exception:
+        pass
 
     pdf.set_font("DejaVu", "B", 16)
     pdf.cell(0, 10, "Diabetes Prediction Medical Report", ln=True, align="C")
@@ -320,7 +322,6 @@ def generate_medical_pdf(patient, prediction_text, range_bars_png, radar_png):
     with open(temp_pdf.name, "rb") as f:
         pdf_bytes = f.read()
     return pdf_bytes
-
 # ---------------------- APP ----------------------
 def main():
     st.set_page_config(page_title="Diabetes Prediction", layout="wide", page_icon="🩺")
@@ -506,6 +507,7 @@ if __name__ == "__main__":
     main()
 
 # Run:     py -m streamlit run c:/Users/sripathivr/Tasks/Diabetes_Prediction/Diabetes_Prediction.py
+
 
 
 
