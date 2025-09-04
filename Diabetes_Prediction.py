@@ -189,17 +189,8 @@ def generate_medical_pdf(patient, prediction_text, range_bars_png, radar_png):
     pdf = FPDF()
     pdf.add_page()
 
-    # ---- Font setup (safe fallback) ----
-    try:
-        dejavu_path = Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf")
-        if dejavu_path.exists():
-            pdf.add_font("DejaVu", "", str(dejavu_path), uni=True)
-            base_font = "DejaVu"
-        else:
-            base_font = "Arial"
-    except Exception:
-        base_font = "Arial"
-
+    # Use only built-in Helvetica font (safe for fpdf)
+    base_font = "Helvetica"
     pdf.set_font(base_font, "", 12)
 
     # ---- Header ----
@@ -300,12 +291,10 @@ def generate_medical_pdf(patient, prediction_text, range_bars_png, radar_png):
     pdf.cell(0, 8, "Doctor's Recommendation", ln=True)
     pdf.set_font(base_font, "", 12)
     recommendation = (
-        "⚠️ The model predicts a risk of Diabetes. Please consult a physician for confirmatory testing. "
-        "Adopt a balanced diet, regular physical activity, and monitor glucose levels closely."
+        "⚠️ The model predicts a risk of Diabetes. Please consult a physician."
         if "Diabetic" in prediction_text
-        else "✅ No diabetes indicated by the model. Maintain a healthy lifestyle and schedule routine check-ups."
+        else "✅ No diabetes indicated. Maintain a healthy lifestyle."
     )
-
     pdf.multi_cell(0, 7, recommendation)
 
     # ---- Footer ----
@@ -327,8 +316,6 @@ def generate_medical_pdf(patient, prediction_text, range_bars_png, radar_png):
     with open(temp_pdf.name, "rb") as f:
         pdf_bytes = f.read()
     return pdf_bytes
-
-
 # ---------------------- APP ----------------------
 def main():
     st.set_page_config(page_title="Diabetes Prediction", layout="wide", page_icon="🩺")
@@ -514,5 +501,6 @@ if __name__ == "__main__":
     main()
 
 # Run:     py -m streamlit run c:/Users/sripathivr/Tasks/Diabetes_Prediction/Diabetes_Prediction.py
+
 
 
