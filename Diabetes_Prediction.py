@@ -189,7 +189,7 @@ def generate_medical_pdf(patient, prediction_text, range_bars_png, radar_png):
     pdf = FPDF()
     pdf.add_page()
 
-    # ✅ Register all DejaVu styles (regular, bold, italic, bold-italic)
+    # Register all DejaVu styles (regular, bold, italic, bold-italic)
     font_dir = "/usr/share/fonts/truetype/dejavu/"
     pdf.add_font("DejaVu", "", os.path.join(font_dir, "DejaVuSans.ttf"), uni=True)
     pdf.add_font("DejaVu", "B", os.path.join(font_dir, "DejaVuSans-Bold.ttf"), uni=True)
@@ -297,9 +297,9 @@ def generate_medical_pdf(patient, prediction_text, range_bars_png, radar_png):
     pdf.cell(0, 8, "Doctor's Recommendation", ln=True)
     pdf.set_font("DejaVu", "", 12)
     recommendation = (
-        "⚠️ The model predicts a risk of Diabetes. Please consult a physician."
+        "The model predicts a risk of Diabetes. Please consult a physician."
         if "Diabetic" in prediction_text
-        else "✅ No diabetes indicated. Maintain a healthy lifestyle."
+        else "No diabetes indicated. Maintain a healthy lifestyle."
     )
     pdf.multi_cell(0, 7, recommendation)
 
@@ -507,6 +507,7 @@ if __name__ == "__main__":
     main()
 
 # Run:     py -m streamlit run c:/Users/sripathivr/Tasks/Diabetes_Prediction/Diabetes_Prediction.py
+
 
 
 
